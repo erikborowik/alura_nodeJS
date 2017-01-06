@@ -7,10 +7,18 @@ module.exports = function (app) {
 
     app.post("/pagamentos/pagamento", function (req, res) {
         var pagamento = req.body;
-        console.log(pagamento);
+        console.log('processando pagamento...');
+
+        var connection = app.persistencia.connectionFactory();
+        var pagamentoDao = new app.persistencia.PagamentoDao(connection);
+
         pagamento.status = "CRIADO";
         pagamento.data = new Date;
-        res.send(pagamento);
+
+        pagamentoDao.salva(pagamento, function (exception, result) {
+            console.log('pagamento criado: ' + result);
+            res.json(pagamento);
+        });
 
     });
 

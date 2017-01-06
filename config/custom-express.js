@@ -11,6 +11,7 @@ module.exports = function () {
 
     consign()
         .include('controllers')//pasta controllers
+        .then('persistencia')
         .into(app);
 
     return app;
