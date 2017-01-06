@@ -30,10 +30,17 @@ module.exports = function (app) {
 
         pagamentoDao.salva(pagamento, function (exception, result) {
             console.log('pagamento criado: ' + result);
-            if(exception){
+            
+            if (exception) {
                 res.status(500).send(exception);
+                return;
             }
-            res.json(pagamento);
+
+            res.location('/pagamentos/pagamento/' + result.insertId);
+            pagamento.id = result.insertId;
+
+            res.status(201).json(pagamento);
+
         });
 
     });
