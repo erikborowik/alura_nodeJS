@@ -30,7 +30,7 @@ module.exports = function (app) {
 
         pagamentoDao.salva(pagamento, function (exception, result) {
             console.log('pagamento criado: ' + result);
-            
+
             if (exception) {
                 res.status(500).send(exception);
                 return;
@@ -41,6 +41,28 @@ module.exports = function (app) {
 
             res.status(201).json(pagamento);
 
+        });
+
+    });
+
+    app.put('/pagamentos/pagamento/:id', function (req, res) {
+
+        var pagamento = {};
+        var id = req.params.id;
+
+        pagamento.id = id;
+        pagamento.status = 'CONFIRMADO';
+
+        var connection = app.persistencia.connectionFactory();
+        var pagamentoDao = new app.persistencia.PagamentoDao(connection);
+
+        pagamentoDao.atualiza(pagamento, function (erro) {
+            if (erro) {
+                res.status(500).send(erro);
+                return;
+            }
+            console.log('pagamento criado');
+            res.send(pagamento);
         });
 
     });
