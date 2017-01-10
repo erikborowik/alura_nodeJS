@@ -1,6 +1,10 @@
 //app injetado pelo express
 module.exports = function (app) {
 
+    const PAGAMENTO_CRIADO = "CRIADO";
+    const PAGAMENTO_CONFIRMADO = "CONFIRMADO";
+    const PAGAMENTO_CANCELADO = "CANCELADO";
+
     app.get("/pagamentos", function (req, res) {
         res.send('ok');
     });
@@ -25,7 +29,7 @@ module.exports = function (app) {
         var connection = app.persistencia.connectionFactory();
         var pagamentoDao = new app.persistencia.PagamentoDao(connection);
 
-        pagamento.status = "CRIADO";
+        pagamento.status = PAGAMENTO_CRIADO;
         pagamento.data = new Date;
 
         pagamentoDao.salva(pagamento, function (exception, result) {
@@ -36,10 +40,27 @@ module.exports = function (app) {
                 return;
             }
 
-            res.location('/pagamentos/pagamento/' + result.insertId);
             pagamento.id = result.insertId;
+            res.location('/pagamentos/pagamento/' + pagamento.id );
+            
 
-            res.status(201).json(pagamento);
+            var response = {
+                dados_do_pagamento: pagamento,
+                links: [
+                    {
+                        href: "http://localhost:3000/pagamentos/pagamento/" + pagamento.id,
+                        rel: "confirmar",
+                        method: "PUT"
+                    },
+                    {
+                        href: "http://localhost:3000/pagamentos/pagamento/" + pagamento.id,
+                        rel: "cancelar",
+                        method: "DELETE"
+                    }
+                ]
+            }
+
+            res.status(201).json(response);
 
         });
 
@@ -51,7 +72,7 @@ module.exports = function (app) {
         var id = req.params.id;
 
         pagamento.id = id;
-        pagamento.status = 'CONFIRMADO';
+        pagamento.status = PAGAMENTO_CONFIRMADO;
 
         var connection = app.persistencia.connectionFactory();
         var pagamentoDao = new app.persistencia.PagamentoDao(connection);
@@ -72,7 +93,7 @@ module.exports = function (app) {
         var id = req.params.id;
 
         pagamento.id = id;
-        pagamento.status = 'CANCELADO';
+        pagamento.status = PAGAMENTO_CANCELADO;
 
         var connection = app.persistencia.connectionFactory();
         var pagamentoDao = new app.persistencia.PagamentoDao(connection);
